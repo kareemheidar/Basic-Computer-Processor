@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class Processor {
@@ -131,10 +135,12 @@ public class Processor {
     }
     public void fetch() {
         // Complete the fetch() body...
-        for (int ins = 0; ins < 1024; ins++) {
-            decode(ins);
-            PC++;
-        }
+//        for (int ins = 0; ins < 1024; ins++) {
+//            decode(ins);
+//            PC++;
+//        }
+        decode(Memory[0]);
+        PC++;
         // Complete the fetch() body...
     }
 
@@ -154,14 +160,14 @@ public class Processor {
         opcode = instruction & 0b11110000000000000000000000000000;
         opcode = opcode >>> 28;
 
-        rs = instruction & 0b00001111100000000000000000000000;
-        rs = rs >>> 23;
+        rd = instruction & 0b00001111100000000000000000000000;
+        rd = rd >>> 23;
 
-        rt = instruction & 0b00000000011111000000000000000000;
-        rt = rt >>> 18;
+        rs = instruction & 0b00000000011111000000000000000000;
+        rs = rs >>> 18;
 
-        rd = instruction & 0b00000000000000111110000000000000;
-        rd = rd >>> 13;
+        rt = instruction & 0b00000000000000111110000000000000;
+        rt = rt >>> 13;
 
         shamt = instruction & 0b00000000000000000001111111111111;
 
@@ -316,8 +322,49 @@ public class Processor {
 
     }
 
+    public static String readFile(String argument) throws IOException {
+        String filePath = argument;
+        filePath += ".txt"; //Program.txt
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append("\n");
+            }
+            // delete the last new line separator
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            reader.close();
+            return stringBuilder.toString();
+        } catch (FileNotFoundException e) {
+            System.out.println("No File Exists");
+            return "No File Exists";
+        }
 
-    public static void main(String[] args) {
+    }
+
+    public static void runProgram(String filePath) throws IOException {
+        String dataOfTheFile = readFile(filePath);
+        String[] lines = dataOfTheFile.trim().split("\\n+");
+        for (String line:lines) {
+//            readInstruction(line);
+            System.out.println(line);
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        Processor p = new Processor();
+        Registers[0] =20;
+        Registers[1] =35;
+        String i = "SUB R7 R1 R0";
+        System.out.println(Registers[7] + "  "+ Registers[1] +"  "+ Registers[0]);
+        System.out.println(readInstruction(i));
+        Memory[0] = readInstruction(i);
+        p.fetch();
+        runProgram("src/Test11");
+
+
 
     }
 }
