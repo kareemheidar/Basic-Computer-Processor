@@ -9,6 +9,25 @@ public class Processor {
     static int[] Registers;
     int PC;
     final int zero;
+    int IFtoID;
+    int opcode = 0;  // bits31:28
+    int rs = 0;      // bits27:24
+    int rt = 0;      // bit23:20
+    int rd = 0;      // bits19:16
+    int shamt = 0;   // bits15:12
+    int imm = 0;     // bits19:0
+    int address = 0; // bits27:0
+    int valueRS = 0;
+    int valueRT = 0;
+    int valueRD = 0;
+    int output = 0;
+    int zeroFlag = 0;
+    int SW_index = 0;
+    int LW_index = 0;
+    int LW_WriteBack = 0;
+
+
+
 
     Processor(){
         Memory = new int[2048];
@@ -17,7 +36,7 @@ public class Processor {
         PC = 0;
     }
 
-    public static int readInstruction(String line){
+    public int readInstruction(String line){
         String[] Line = line.split(" ");
         String operation = Line[0];
         int instruction=0;
@@ -134,28 +153,12 @@ public class Processor {
         return n;
     }
     public void fetch() {
-        // Complete the fetch() body...
-//        for (int ins = 0; ins < 1024; ins++) {
-//            decode(ins);
-//            PC++;
-//        }
-        decode(Memory[0]);
+        IFtoID = Memory[PC];
         PC++;
-        // Complete the fetch() body...
     }
 
     public void decode(int instruction) {
 
-        int opcode = 0;  // bits31:28
-        int rs = 0;      // bits27:24
-        int rt = 0;      // bit23:20
-        int rd = 0;      // bits19:16
-        int shamt = 0;   // bits15:12
-        int imm = 0;     // bits19:0
-        int address = 0; // bits27:0
-
-        int valueRS = 0;
-        int valueRT = 0;
 
         opcode = instruction & 0b11110000000000000000000000000000;
         opcode = opcode >>> 28;
@@ -179,26 +182,24 @@ public class Processor {
 
         valueRT = Registers[rt];
 
-        execute(opcode,valueRS,valueRT,rd,shamt,imm,address);
+        valueRD = Registers[rd];
 
-
-        System.out.println("Instruction "+PC);
-        System.out.println("opcode = "+opcode);
-        System.out.println("rs = "+rs);
-        System.out.println("rt = "+rt);
-        System.out.println("rd = "+rd);
-        System.out.println("shift amount = "+shamt);
-
-        System.out.println("immediate = "+imm);
-        System.out.println("address = "+address);
-        System.out.println("value[rs] = "+valueRS);
-        System.out.println("value[rt] = "+valueRT);
-        System.out.println("----------");
+//
+//        System.out.println("Instruction "+PC);
+//        System.out.println("opcode = "+opcode);
+//        System.out.println("rs = "+rs);
+//        System.out.println("rt = "+rt);
+//        System.out.println("rd = "+rd);
+//        System.out.println("shift amount = "+shamt);
+//
+//        System.out.println("immediate = "+imm);
+//        System.out.println("address = "+address);
+//        System.out.println("value[rs] = "+valueRS);
+//        System.out.println("value[rt] = "+valueRT);
+//        System.out.println("----------");
     }
-    public int ALU(int operandA, int operandB, int operation) {
+    public void ALU(int operandA, int operandB, int operation) {
 
-        int output = 0;
-        int zeroFlag = 0;
 
         switch(operation){
             case 0:
@@ -237,13 +238,11 @@ public class Processor {
             zeroFlag = 1;
         }
 
-        System.out.println("Operation = "+operation);
-        System.out.println("First Operand = "+operandA);
-        System.out.println("Second Operand = "+operandB);
-        System.out.println("Result = "+output);
-        System.out.println("Zero Flag = "+zeroFlag);
-
-        return output;
+//        System.out.println("Operation = "+operation);
+//        System.out.println("First Operand = "+operandA);
+//        System.out.println("Second Operand = "+operandB);
+//        System.out.println("Result = "+output);
+//        System.out.println("Zero Flag = "+zeroFlag);
     }
 
     public void BNE(int operandA, int operandB, int operandC) {
@@ -278,10 +277,10 @@ public class Processor {
         int output;
         if (type == 1){
             if (opcode == 8 || opcode == 9){
-                Registers[rd] = ALU(valueRS,shamt,opcode);
+                ALU(valueRS,shamt,opcode);
             }
             else{
-                Registers[rd] = ALU(valueRS,valueRT,opcode);
+                ALU(valueRS,valueRT,opcode);
             }
         }
         else if (type == 2){
@@ -290,12 +289,14 @@ public class Processor {
             }
             else if (opcode == 10) {
                 //Read from memory
+                loadWord();
             }
             else if (opcode == 11){
                 //Write in memory
+                storeWord();
             }
             else {
-                Registers[rd] = ALU(valueRS,imm,opcode);
+                ALU(valueRS,imm,opcode);
             }
         }
         else {
@@ -303,23 +304,32 @@ public class Processor {
         }
     }
 
-    static void saveMemory(int R1,int R2,int imm) {
-        int valueOfR2 = Registers[R2];
-        int index = imm + valueOfR2;
+    public void storeWord() {
+        int index = imm + valueRS;
         if(index>1023) {
-            Memory[index] = Registers[R1];
+            SW_index = index;
         }else {
             System.out.println("This memory location is reserved for the Instructions");
         }
-
-
     }
 
-    static void loadMemory(int R1,int R2,int imm) {
-        int valueOfR2 = Registers[R2];
-        int index = imm + valueOfR2;
-        Registers[R1] = Memory[index];
-
+    public void loadWord() {
+        LW_index = imm + valueRS;
+    }
+    public void memoryAccess(){
+        if (opcode == 10){
+            LW_WriteBack = Memory[LW_index];
+        }
+        else if(opcode == 11){
+            Memory[SW_index] = valueRD;
+        }
+    }
+    public void writeBack(){
+        if (opcode != 4 || opcode != 7 || opcode != 11){
+            if (opcode == 10)
+                Registers[rd] = LW_WriteBack;
+            else Registers[rd] = output;
+        }
     }
 
     public static String readFile(String argument) throws IOException {
@@ -344,25 +354,31 @@ public class Processor {
 
     }
 
-    public static void runProgram(String filePath) throws IOException {
+    public void runProgram(String filePath) throws IOException {
         String dataOfTheFile = readFile(filePath);
         String[] lines = dataOfTheFile.trim().split("\\n+");
+        int c = 0;
         for (String line:lines) {
-//            readInstruction(line);
+            Memory[c] = readInstruction(line);
+            c++;
             System.out.println(line);
         }
+        fetch();
     }
 
     public static void main(String[] args) throws IOException {
         Processor p = new Processor();
-        Registers[0] =20;
-        Registers[1] =35;
-        String i = "SUB R7 R1 R0";
-        System.out.println(Registers[7] + "  "+ Registers[1] +"  "+ Registers[0]);
-        System.out.println(readInstruction(i));
-        Memory[0] = readInstruction(i);
-        p.fetch();
-        runProgram("src/Test11");
+//        Registers[0] =20;
+//        Registers[1] =35;
+//        String i = "SUB R7 R1 R0";
+//        System.out.println(Registers[7] + "  "+ Registers[1] +"  "+ Registers[0]);
+//        System.out.println(readInstruction(i));
+//        Memory[0] = readInstruction(i);
+//        p.fetch();
+        p.runProgram("src/Test11");
+        System.out.println("HEHAHHRHARHERHHAEHRHERHAHEHRAEHRHAEHR");
+        System.out.println("Saved:"+ " "+Registers[14] + "  "+ Registers[15] +"  "+ Registers[16]+" "+ Registers[17] );
+        System.out.println("Result:"+ " "+Registers[18] + "  "+ Registers[19] +"  "+ Registers[20]+" "+ Registers[21] );
 
 
 
