@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Processor {
@@ -254,8 +255,8 @@ public class Processor {
         instruction[11] = output;
 
 //        System.out.println("Operation = "+operation);
-        System.out.println("First Operand = "+operandA);
-        System.out.println("Second Operand = "+operandB);
+//        System.out.println("First Operand = "+operandA);
+//        System.out.println("Second Operand = "+operandB);
 //        System.out.println("Result = "+output);
 //        System.out.println("Zero Flag = "+zeroFlag);
 //        System.out.println(instruction[]);
@@ -293,8 +294,8 @@ public class Processor {
         int shamt = instruction[5];
         int imm = instruction[6];
         int address = instruction[7];
-        int valueRS = instruction[8];
-        int valueRT = instruction[9];
+        int valueRS = Registers[instruction[3]];
+        int valueRT = Registers[instruction[4]];
         int type = checkType(opcode);
         if (type == 1){
             if (opcode == 8 || opcode == 9){
@@ -340,7 +341,7 @@ public class Processor {
     }
     public void memoryAccess(int[] instruction){
         int opcode = instruction[1];
-        int valueRD = instruction[10];
+        int valueRD = Registers[instruction[2]];
         int LW_index = instruction[13];
         int SW_index = instruction[14];
         if (opcode == 10){
@@ -397,15 +398,15 @@ public class Processor {
                     }
                     if (fetchedInstructions.containsKey(pointer)) {
                         decode(fetchedInstructions.get(pointer)[0], pointer);
+                        pointer++;
                     }
-                    pointer++;
 
                 }else{
                     if (fetchedInstructions.containsKey(pointer-3)){
                         writeBack(fetchedInstructions.get(pointer-3));
                     }
-                    if(fetchedInstructions.containsKey(pointer-1)){
-                        execute(fetchedInstructions.get(pointer-1));
+                    if(fetchedInstructions.containsKey(pointer-2)){
+                        execute(fetchedInstructions.get(pointer-2));
                     }
                     fetch();
                 }
@@ -431,12 +432,11 @@ public class Processor {
         Processor p = new Processor();
         p.runProgram("src/Test11");
         System.out.println("HEHAHHRHARHERHHAEHRHERHAHEHRAEHRHAEHR");
-        System.out.println("Saved:"+ " "+Registers[24] + "  "+ Registers[25] +"  "+ Registers[26]+"  "+ Registers[27] );
-        System.out.println("R20 " + Registers[20]);
-        System.out.println("R21 " + Registers[21]);
-        System.out.println("R22 " + Registers[22]);
-//        System.out.println("Result:"+ " "+Registers[18] + "  "+ Registers[19] +"  "+ Registers[20]+" "+ Registers[21] );
-
+        System.out.println("Result:"+ " R4 "+Registers[4] + " ,R5  "+ Registers[5] +" ,R6  "+ Registers[6]+" ,R7  "+ Registers[7] );
+//        System.out.println("R1 " + Registers[1]);
+//        System.out.println("R2 " + Registers[2]);
+//        System.out.println("R3 " + Registers[3]);
+//        System.out.println(Arrays.toString(Registers));
 
 
     }
