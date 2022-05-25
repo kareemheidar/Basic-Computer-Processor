@@ -13,6 +13,7 @@ public class Processor {
     int zeroFlag = 0;
     int numberOfInstructions = 0;
     int instructionNumber = 1;
+    int pointer;
 
     HashMap <Integer, int[]> fetchedInstructions = new HashMap<>();
 
@@ -22,7 +23,7 @@ public class Processor {
     Processor(){
         Memory = new int[2048];
         zero = 0;
-        Registers = new int[31];
+        Registers = new int[32];
         PC = 0;
     }
 
@@ -78,8 +79,8 @@ public class Processor {
                 break;
             case "ANDI":
                 opcode = 5<<28;
-                R1 =  getRegister(Line[1])<<24;
-                R2 =  getRegister(Line[2])<<19;
+                R1 =  getRegister(Line[1])<<23;
+                R2 =  getRegister(Line[2])<<18;
                 imm= Integer.parseInt(Line[3]);
                 instruction = opcode | R1 | R2 | imm;
                 break;
@@ -264,12 +265,13 @@ public class Processor {
 
     public void BNE(int operandA, int operandB, int operandC) {
         if (operandA!=operandB){
-            PC = PC + 1 + operandC;
+            PC = PC + operandC;
         }
     }
     public void Jump(int address) {
         int leftMostPC = PC & 0b11110000000000000000000000000000;
-        PC = leftMostPC | address;
+        PC = leftMostPC | address -1;
+
     }
     public int checkType(int opcode){
         switch (opcode){
@@ -294,8 +296,8 @@ public class Processor {
         int shamt = instruction[5];
         int imm = instruction[6];
         int address = instruction[7];
-        int valueRS = Registers[instruction[3]];
-        int valueRT = Registers[instruction[4]];
+        int valueRS = instruction[8];
+        int valueRT = instruction[9];
         int type = checkType(opcode);
         if (type == 1){
             if (opcode == 8 || opcode == 9){
@@ -341,7 +343,7 @@ public class Processor {
     }
     public void memoryAccess(int[] instruction){
         int opcode = instruction[1];
-        int valueRD = Registers[instruction[2]];
+        int valueRD = instruction[10];
         int LW_index = instruction[13];
         int SW_index = instruction[14];
         if (opcode == 10){
@@ -388,7 +390,7 @@ public class Processor {
     public void pipeline(){
         int CLK = 7+((numberOfInstructions-1)*2);
         int i =1;
-        int pointer = 1;
+        pointer = 1;
         fetch();
         while (i<=CLK){
             if(i>1){
@@ -407,6 +409,7 @@ public class Processor {
                     }
                     if(fetchedInstructions.containsKey(pointer-2)){
                         execute(fetchedInstructions.get(pointer-2));
+
                     }
                     fetch();
                 }
@@ -431,13 +434,13 @@ public class Processor {
     public static void main(String[] args) throws IOException {
         Processor p = new Processor();
         p.runProgram("src/Test11");
-        System.out.println("HEHAHHRHARHERHHAEHRHERHAHEHRAEHRHAEHR");
-        System.out.println("Result:"+ " R4 "+Registers[4] + " ,R5  "+ Registers[5] +" ,R6  "+ Registers[6]+" ,R7  "+ Registers[7] );
-//        System.out.println("R1 " + Registers[1]);
-//        System.out.println("R2 " + Registers[2]);
-//        System.out.println("R3 " + Registers[3]);
-//        System.out.println(Arrays.toString(Registers));
+        System.out.println(Arrays.toString(Registers));
+        System.out.println("STORE: "+ Memory[2047]);
+        System.out.println("STORE: "+ Memory[2047]);
+
+
 
 
     }
+
 }
