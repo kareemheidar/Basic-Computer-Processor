@@ -392,23 +392,34 @@ public class Processor {
         int i =1;
         pointer = 1;
         fetch();
+        System.out.println("At Clock Cycle "+ 1);
+        System.out.println("Instruction #" + (PC) + " was fetched");
         while (i<=CLK){
             if(i>1){
+                System.out.println("At Clock Cycle "+ i);
                 if(i%2==0){
                     if (fetchedInstructions.containsKey(pointer-2)){
                         memoryAccess(fetchedInstructions.get(pointer-2));
+                        if(Memory[PC-3] != 0)
+                            System.out.println("Instruction #" + (PC-2) + " had access to memory");
                     }
                     if (fetchedInstructions.containsKey(pointer)) {
                         decode(fetchedInstructions.get(pointer)[0], pointer);
+                        if(Memory[PC-1] != 0)
+                            System.out.println("Instruction #" + (PC) + " was decoded");
                         pointer++;
                     }
 
                 }else{
                     if (fetchedInstructions.containsKey(pointer-3)){
                         writeBack(fetchedInstructions.get(pointer-3));
+                        if(Memory[PC-3] != 0)
+                            System.out.println("Instruction #" + (PC - 2) + " at write back stage");
                     }
                     if(fetchedInstructions.containsKey(pointer-2)){
                         execute(fetchedInstructions.get(pointer-2));
+                        if (Memory[PC-2] != 0)
+                            System.out.println("Instruction #" + (PC-1) + " was executed");
                         if(jumpFlag){
                             fetchedInstructions.clear();
                             pointer = 1;
@@ -418,8 +429,11 @@ public class Processor {
 
                     }
                     fetch();
+                    if (Memory[PC-1] != 0)
+                        System.out.println("Instruction #" + (PC) + " was fetched");
                 }
             }
+            System.out.println();
             i++;
         }
     }
@@ -432,7 +446,7 @@ public class Processor {
         for (String line:lines) {
             Memory[c] = readInstruction(line);
             c++;
-            System.out.println(line);
+//            System.out.println(line);
         }
         pipeline();
     }
