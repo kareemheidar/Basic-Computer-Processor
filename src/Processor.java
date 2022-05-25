@@ -4,11 +4,10 @@ public class Processor {
     static int[] Memory;
     static int[] Registers;
     int PC;
-    final int zero;
+    final int zero = 0;
 
     Processor(){
         Memory = new int[2048];
-        zero = 0;
         Registers = new int[31];
         PC = 0;
     }
@@ -131,10 +130,12 @@ public class Processor {
     }
     public void fetch() {
         // Complete the fetch() body...
-        for (int ins = 0; ins < 1024; ins++) {
-            decode(ins);
-            PC++;
-        }
+//        for (int ins = 0; ins < 1024; ins++) {
+//            decode(ins);
+//            PC++;
+//        }
+        decode(Memory[0]);
+        PC++;
         // Complete the fetch() body...
     }
 
@@ -154,14 +155,14 @@ public class Processor {
         opcode = instruction & 0b11110000000000000000000000000000;
         opcode = opcode >>> 28;
 
-        rs = instruction & 0b00001111100000000000000000000000;
-        rs = rs >>> 23;
+        rd = instruction & 0b00001111100000000000000000000000;
+        rd = rd >>> 23;
 
-        rt = instruction & 0b00000000011111000000000000000000;
-        rt = rt >>> 18;
+        rs = instruction & 0b00000000011111000000000000000000;
+        rs = rs >>> 18;
 
-        rd = instruction & 0b00000000000000111110000000000000;
-        rd = rd >>> 13;
+        rt = instruction & 0b00000000000000111110000000000000;
+        rt = rt >>> 13;
 
         shamt = instruction & 0b00000000000000000001111111111111;
 
@@ -169,8 +170,8 @@ public class Processor {
 
         address = instruction & 0b00001111111111111111111111111111;
 
-        valueRS = Registers[rs];
 
+        valueRS = Registers[rs];
         valueRT = Registers[rt];
 
         execute(opcode,valueRS,valueRT,rd,shamt,imm,address);
@@ -318,6 +319,10 @@ public class Processor {
 
 
     public static void main(String[] args) {
+        Processor p = new Processor();
+        System.out.println(getRegister("R21"));
+
+
 
     }
 }
