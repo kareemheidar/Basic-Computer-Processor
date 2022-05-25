@@ -1,9 +1,6 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.io.*;
+import java.util.*;
+
 
 public class Processor {
     static int[] Memory;
@@ -16,6 +13,7 @@ public class Processor {
     int pointer;
 
     HashMap <Integer, int[]> fetchedInstructions = new HashMap<>();
+    boolean jumpFlag = false;
 
 
 
@@ -271,6 +269,7 @@ public class Processor {
     public void Jump(int address) {
         int leftMostPC = PC & 0b11110000000000000000000000000000;
         PC = leftMostPC | address -1;
+        jumpFlag = true;
 
     }
     public int checkType(int opcode){
@@ -409,6 +408,12 @@ public class Processor {
                     }
                     if(fetchedInstructions.containsKey(pointer-2)){
                         execute(fetchedInstructions.get(pointer-2));
+                        if(jumpFlag){
+                            fetchedInstructions.clear();
+                            pointer = 1;
+                            instructionNumber = 1;
+                            jumpFlag = false;
+                        }
 
                     }
                     fetch();
