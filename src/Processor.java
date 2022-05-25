@@ -263,7 +263,8 @@ public class Processor {
 
     public void BNE(int operandA, int operandB, int operandC) {
         if (operandA!=operandB){
-            PC = PC + operandC;
+            PC = PC + operandC -1;
+            jumpFlag = true;
         }
     }
     public void Jump(int address) {
