@@ -9,7 +9,6 @@ public class Processor {
     static int[] Memory;
     static int[] Registers;
     int PC;
-    final int zero;
     int zeroFlag = 0;
     int numberOfInstructions = 0;
     int instructionNumber = 1;
@@ -17,11 +16,11 @@ public class Processor {
 
     HashMap<Integer, int[]> fetchedInstructions = new HashMap<>();
     boolean jumpFlag = false;
+    String outputString = "";
 
 
     Processor() {
         Memory = new int[2048];
-        zero = 0;
         Registers = new int[32];
         PC = 0;
     }
@@ -160,7 +159,8 @@ public class Processor {
         int valueRS;
         int valueRT;
         int valueRD;
-        System.out.println("instruction is "+ instruction);
+        System.out.println("Decoding instruction: " + instruction);
+        outputString = outputString + "Decoding instruction: " + instruction + "\n";
         opcode = instruction & 0b11110000000000000000000000000000;
         opcode = opcode >>> 28;
 
@@ -307,10 +307,14 @@ public class Processor {
         int address = instruction[7];
         int valueRS = instruction[8];
         int valueRT = instruction[9];
-        System.out.println("Opcode is: "+opcode);
-        System.out.println("shamt is: "+shamt);
-        System.out.println("imm is: "+imm);
-        System.out.println("address is: "+address);
+        System.out.println("Opcode is: " + opcode);
+        outputString = outputString + "Opcode is: " + opcode + "\n";
+        System.out.println("shamt is: " + shamt);
+        outputString = outputString + "shamt is: " + shamt + "\n";
+        System.out.println("imm is: " + imm);
+        outputString = outputString + "Immediate is: " + imm + "\n";
+        System.out.println("address is: " + address);
+        outputString = outputString + "Address is: " + address + "\n";
         int type = checkType(opcode);
         if (type == 1) {
             if (opcode == 8 || opcode == 9) {
@@ -342,6 +346,7 @@ public class Processor {
             instruction[14] = index;
         } else {
             System.out.println("This memory location is reserved for the Instructions");
+            outputString = outputString + "This memory location is reserved for the Instructions" + "\n";
         }
     }
 
@@ -354,16 +359,23 @@ public class Processor {
         int valueRD = instruction[10];
         int LW_index = instruction[13];
         int SW_index = instruction[14];
-        System.out.println("Opcode: "+opcode);
-        System.out.println("ValueRD: "+valueRD);
-        System.out.println("LW INDEX: "+LW_index);
-        System.out.println("SW INDEX: "+SW_index);
+        System.out.println("Opcode: " + opcode);
+        outputString = outputString + "Opcode is: " + opcode + "\n";
+        System.out.println("ValueRD: " + valueRD);
+        outputString = outputString + "ValueRd is: " + valueRD + "\n";
+        System.out.println("LW INDEX: " + LW_index);
+        outputString = outputString + "LoadWord index is: " + LW_index + "\n";
+        System.out.println("SW INDEX: " + SW_index);
+        outputString = outputString + "StoreWord index is: " + SW_index + "\n";
         if (opcode == 10) {
             instruction[12] = Memory[LW_index];
         } else if (opcode == 11) {
-            System.out.println("Value of memory at index "+SW_index+"before update is"+Memory[SW_index]);
+            System.out.println("Value of memory at index " + SW_index + "before update is" + Memory[SW_index]);
+            outputString = outputString + "Value of memory at index " + SW_index + "before update is" + Memory[SW_index] + "\n";
             Memory[SW_index] = valueRD;
-            System.out.println("Value of memory at index "+SW_index+"after update is"+Memory[SW_index]);
+            System.out.println("Value of memory at index " + SW_index + "after update is" + Memory[SW_index]);
+            outputString = outputString + "Value of memory at index " + SW_index + "after update is" + Memory[SW_index] + "\n";
+
         }
     }
 
@@ -372,21 +384,25 @@ public class Processor {
         int rd = instruction[2];
         int output = instruction[11];
         int LW_WriteBack = instruction[12];
-        System.out.println("Opcode "+ opcode);
-        System.out.println("RD "+ rd);
-        System.out.println("Output "+ output);
-        System.out.println("LW_WriteBack "+ LW_WriteBack);
+        System.out.println("Opcode " + opcode);
+        outputString = outputString + "Opcode is: " + opcode + "\n";
+        System.out.println("RD " + rd);
+        outputString = outputString + "RD is: " + rd + "\n";
+        System.out.println("Output " + output);
+        outputString = outputString + "Output is: " + output + "\n";
+        System.out.println("LW_WriteBack " + LW_WriteBack);
+        outputString = outputString + "LW_WriteBack is: " + LW_WriteBack + "\n";
         if (opcode != 4 || opcode != 7 || opcode != 11) {
+            System.out.println("The old value of register of R" + rd + " is " + Registers[rd]);
+            outputString = outputString + "The old value of register of R" + rd + " is " + Registers[rd] + "\n";
             if (opcode == 10) {
-                System.out.println("The old value of register of R" + rd + " is " + Registers[rd]);
                 Registers[rd] = LW_WriteBack;
-                System.out.println("The new value of register of R" + rd + " is " + Registers[rd]);
-            }
-            else{
-                System.out.println("The old value of register of R" + rd + " is " + Registers[rd]);
+            } else {
                 Registers[rd] = output;
-                System.out.println("The new value of register of R" + rd + " is " + Registers[rd]);
             }
+            System.out.println("The new value of register of R" + rd + " is " + Registers[rd]);
+            outputString = outputString + "The new value of register of R" + rd + " is " + Registers[rd] + "\n";
+
         }
 
     }
@@ -418,32 +434,42 @@ public class Processor {
         int i = 1;
         pointer = 1;
         fetch();
-        System.out.println("At Clock Cycle " + 1);
-        System.out.println("Instruction #" + (PC) + " was fetched");
+        System.out.println("At Clock Cycle " + 1+" Instruction #" + (PC) + " was fetched");
+        outputString = outputString+ "At Clock Cycle " + 1+" Instruction #" + (PC) + " was fetched"+"\n"+"\n";
         while (i <= CLK) {
             if (i > 1) {
                 if (i % 2 == 0) {
                     if (fetchedInstructions.containsKey(pointer - 2)) {
                         memoryAccess(fetchedInstructions.get(pointer - 2));
-                        System.out.println("At Clock Cycle " + i+" instruction #"+(pointer-2)+" was in had access to memory");
+                        System.out.println("At Clock Cycle " + i+" Instruction #"+(pointer-2)+" had access to memory");
+                        outputString = outputString +"At Clock Cycle " + i+" Instruction #"+(pointer-2)+" had access to memory"+"\n"+"\n";
                     }
                     if (fetchedInstructions.containsKey(pointer)) {
                         decode(fetchedInstructions.get(pointer)[0], pointer);
-                        if (Memory[PC - 1] != 0)
-                            System.out.println("Instruction #" + (PC) + " was decoded");
+                        if (Memory[PC - 1] != 0){
+                            System.out.println("At Clock Cycle " + i+" Instruction #" + (PC) + " was decoded");
+                            outputString = outputString +"At Clock Cycle " + i+" Instruction #" + (PC) + " was decoded"+"\n"+"\n";
+                        }
+
                         pointer++;
                     }
 
                 } else {
                     if (fetchedInstructions.containsKey(pointer - 3)) {
                         writeBack(fetchedInstructions.get(pointer - 3));
-                        if (Memory[PC - 3] != 0)
-                            System.out.println("Instruction #" + (PC - 2) + " at write back stage");
+                        if (Memory[PC - 3] != 0){
+                            System.out.println("At Clock Cycle " + i+" Instruction #" + (PC - 2) + " at write back stage");
+                            outputString = outputString +"At Clock Cycle " + i+" Instruction #" + (PC - 2) + " was at write back stage" +"\n"+"\n";
+                        }
+
                     }
                     if (fetchedInstructions.containsKey(pointer - 2)) {
                         execute(fetchedInstructions.get(pointer - 2));
-                        if (Memory[PC - 2] != 0)
-                            System.out.println("Instruction #" + (PC - 1) + " was executed");
+                        if (Memory[PC - 2] != 0){
+                            System.out.println("At Clock Cycle " + i+" Instruction #" + (PC - 1) + " was executed");
+                            outputString = outputString + "At Clock Cycle " + i+" Instruction #" + (PC - 1) + " was executed"+"\n"+"\n";
+                        }
+
                         if (jumpFlag) {
                             fetchedInstructions.clear();
                             pointer = 1;
@@ -453,8 +479,10 @@ public class Processor {
 
                     }
                     fetch();
-                    if (Memory[PC - 1] != 0)
-                        System.out.println("Instruction #" + (PC) + " was fetched");
+                    if (Memory[PC - 1] != 0){
+                        System.out.println("At Clock Cycle " + i+" Instruction #" + (PC) + " was fetched");
+                        outputString = outputString +"At Clock Cycle " + i+" Instruction #" + (PC) + " was fetched"+"\n"+"\n";
+                    }
                 }
             }
             System.out.println();
@@ -462,9 +490,9 @@ public class Processor {
         }
     }
 
-    public void runProgram(String filePath) throws IOException {
-        String dataOfTheFile = readFile(filePath);
-        String[] lines = dataOfTheFile.trim().split("\\n+");
+    public void runProgram(String file) throws IOException {
+//        String dataOfTheFile = readFile(filePath);
+        String[] lines = file.trim().split("\\n+");
         numberOfInstructions = lines.length;
         int c = 0;
         for (String line : lines) {
@@ -475,6 +503,8 @@ public class Processor {
         pipeline();
         System.out.println(Arrays.toString(Registers));
         System.out.println(Arrays.toString(Memory));
+        outputString = outputString+Arrays.toString(Registers)+"\n";
+        outputString = outputString+Arrays.toString(Memory)+"\n";
     }
 
     public static void main(String[] args) throws IOException {

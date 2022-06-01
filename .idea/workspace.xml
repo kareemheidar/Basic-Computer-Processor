@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="84770edf-65dc-41b4-9404-411f640d0a0d" name="Changes" comment="fix bugs in the memoryAccess">
+    <list default="true" id="84770edf-65dc-41b4-9404-411f640d0a0d" name="Changes" comment="tracking called instructions in every clock cycle">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Processor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Processor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Test11.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Test11.txt" afterDir="false" />
     </list>
@@ -38,7 +39,14 @@
       <recent name="" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.Main">
+    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Main" />
+      <module name="CSA_Project" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Processor" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Processor" />
       <module name="CSA_Project" />
@@ -48,6 +56,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.Main" />
         <item itemvalue="Application.Processor" />
       </list>
     </recent_temporary>
@@ -75,7 +84,14 @@
       <option name="project" value="LOCAL" />
       <updated>1653272719174</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="tracking called instructions in every clock cycle">
+      <created>1654109088916</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1654109088916</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -92,7 +108,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="add pipeline function" />
     <MESSAGE value="fix bugs in the execute method and pipeline" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix bugs in the execute method and pipeline" />
+    <MESSAGE value="tracking called instructions in every clock cycle" />
+    <option name="LAST_COMMIT_MESSAGE" value="tracking called instructions in every clock cycle" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
