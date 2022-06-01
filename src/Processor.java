@@ -1,6 +1,9 @@
-import java.io.*;
-import java.util.*;
-
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
 
 public class Processor {
     static int[] Memory;
@@ -12,142 +15,140 @@ public class Processor {
     int instructionNumber = 1;
     int pointer;
 
-    HashMap <Integer, int[]> fetchedInstructions = new HashMap<>();
+    HashMap<Integer, int[]> fetchedInstructions = new HashMap<>();
     boolean jumpFlag = false;
 
 
-
-
-    Processor(){
+    Processor() {
         Memory = new int[2048];
         zero = 0;
         Registers = new int[32];
         PC = 0;
     }
 
-    public int readInstruction(String line){
+    public int readInstruction(String line) {
         String[] Line = line.split(" ");
         String operation = Line[0];
-        int instruction=0;
+        int instruction = 0;
         int opcode;
 
-        int R1 ;
-        int R2 ;
-        int R3  ;
+        int R1;
+        int R2;
+        int R3;
         int shamt;
-        int imm ;
+        int imm;
         int address;
-        switch (operation){
+        switch (operation) {
             case "ADD":
-                opcode = 0<<28;
-                R1 = getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
-                R3 = getRegister(Line[3])<<13;
+                opcode = 0 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
+                R3 = getRegister(Line[3]) << 13;
                 shamt = 0;
                 instruction = opcode | R1 | R2 | R3 | shamt;
                 break;
             case "SUB":
-                opcode = 1<<28;
-                R1 =  getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
-                R3 =  getRegister(Line[3])<<13;
+                opcode = 1 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
+                R3 = getRegister(Line[3]) << 13;
                 shamt = 0;
                 instruction = opcode | R1 | R2 | R3 | shamt;
                 break;
             case "MULI":
-                opcode = 2<<28;
-                R1 =  getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
-                imm= Integer.parseInt(Line[3]);
+                opcode = 2 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
+                imm = Integer.parseInt(Line[3]);
                 instruction = opcode | R1 | R2 | imm;
                 break;
             case "ADDI":
-                opcode = 3<<28;
-                R1 =  getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
-                imm= Integer.parseInt(Line[3]);
+                opcode = 3 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
+                imm = Integer.parseInt(Line[3]);
                 instruction = opcode | R1 | R2 | imm;
                 break;
             case "BNE":
-                opcode = 4<<28;
-                R1 =  getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
-                imm= Integer.parseInt(Line[3]);
+                opcode = 4 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
+                imm = Integer.parseInt(Line[3]);
                 instruction = opcode | R1 | R2 | imm;
                 break;
             case "ANDI":
-                opcode = 5<<28;
-                R1 =  getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
-                imm= Integer.parseInt(Line[3]);
+                opcode = 5 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
+                imm = Integer.parseInt(Line[3]);
                 instruction = opcode | R1 | R2 | imm;
                 break;
             case "ORI":
-                opcode = 6<<28;
-                R1 =  getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
-                imm= Integer.parseInt(Line[3]);
+                opcode = 6 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
+                imm = Integer.parseInt(Line[3]);
                 instruction = opcode | R1 | R2 | imm;
                 break;
             case "J":
-                opcode = 7<<28;
-                address= Integer.parseInt(Line[1]);
+                opcode = 7 << 28;
+                address = Integer.parseInt(Line[1]);
                 instruction = opcode | address;
                 break;
 
             case "SLL":
-                opcode = 8<<28;
-                R1 = getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
+                opcode = 8 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
                 shamt = Integer.parseInt(Line[3]);
-                instruction = opcode | R1 | R2  | shamt;
+                instruction = opcode | R1 | R2 | shamt;
                 break;
             case "SRL":
-                opcode = 9<<28;
-                R1 = getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
+                opcode = 9 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
                 shamt = Integer.parseInt(Line[3]);
-                instruction = opcode | R1 | R2  | shamt;
+                instruction = opcode | R1 | R2 | shamt;
                 break;
             case "LW":
-                opcode = 10<<28;
-                R1 =  getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
-                imm= Integer.parseInt(Line[3]);
+                opcode = 10 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
+                imm = Integer.parseInt(Line[3]);
                 instruction = opcode | R1 | R2 | imm;
                 break;
             case "SW":
-                opcode = 11<<28;
-                R1 =  getRegister(Line[1])<<23;
-                R2 =  getRegister(Line[2])<<18;
-                imm= Integer.parseInt(Line[3]);
+                opcode = 11 << 28;
+                R1 = getRegister(Line[1]) << 23;
+                R2 = getRegister(Line[2]) << 18;
+                imm = Integer.parseInt(Line[3]);
                 instruction = opcode | R1 | R2 | imm;
                 break;
-
 
 
         }
         return instruction;
     }
 
-    public static int getRegister(String R){
+    public static int getRegister(String R) {
         String r = "";
-        if (R.length() == 2){
+        if (R.length() == 2) {
             r = r + R.charAt(1);
-        }else {
+        } else {
             r = r + R.charAt(1) + R.charAt(2);
         }
 
         return Integer.parseInt(r);
     }
+
     public void fetch() {
         fetchedInstructions.put(instructionNumber, new int[15]);
-        fetchedInstructions.get(instructionNumber)[0]=Memory[PC];
+        fetchedInstructions.get(instructionNumber)[0] = Memory[PC];
         instructionNumber++;
         PC++;
     }
 
-    public void decode(int instruction,int instructionId) {
+    public void decode(int instruction, int instructionId) {
 
         int opcode;
         int rd;
@@ -159,6 +160,7 @@ public class Processor {
         int valueRS;
         int valueRT;
         int valueRD;
+        System.out.println("instruction is "+ instruction);
         opcode = instruction & 0b11110000000000000000000000000000;
         opcode = opcode >>> 28;
 
@@ -211,10 +213,11 @@ public class Processor {
 //        System.out.println("value[rd] = "+valueRD);
 //        System.out.println("----------");
     }
-    public void ALU(int operandA, int operandB, int operation,int[] instruction) {
+
+    public void ALU(int operandA, int operandB, int operation, int[] instruction) {
         int output = 0;
 
-        switch(operation){
+        switch (operation) {
             case 0:
                 //ADD R1 R2 R3
                 output = operandA + operandB;
@@ -248,7 +251,7 @@ public class Processor {
                 output = operandA >> operandB;
                 break;
         }
-        if(output == 0){
+        if (output == 0) {
             zeroFlag = 1;
         }
         instruction[11] = output;
@@ -262,68 +265,72 @@ public class Processor {
     }
 
     public void BNE(int operandA, int operandB, int operandC) {
-        if (operandA!=operandB){
-            PC = PC + operandC -1;
+        if (operandA != operandB) {
+            PC = PC + operandC - 1;
             jumpFlag = true;
         }
     }
+
     public void Jump(int address) {
         int leftMostPC = PC & 0b11110000000000000000000000000000;
-        PC = leftMostPC | address -1;
+        PC = leftMostPC | address - 1;
         jumpFlag = true;
 
     }
-    public int checkType(int opcode){
-        switch (opcode){
+
+    public int checkType(int opcode) {
+        switch (opcode) {
             case 0:
             case 1:
             case 8:
-            case 9: return 1;
+            case 9:
+                return 1;
             case 2:
             case 3:
             case 4:
             case 5:
             case 6:
             case 10:
-            case 11: return 2;
-            case 7: return 3;
-            default:return 0;
+            case 11:
+                return 2;
+            case 7:
+                return 3;
+            default:
+                return 0;
         }
     }
 
-    public void execute(int[] instruction){
+    public void execute(int[] instruction) {
         int opcode = instruction[1];
         int shamt = instruction[5];
         int imm = instruction[6];
         int address = instruction[7];
         int valueRS = instruction[8];
         int valueRT = instruction[9];
+        System.out.println("Opcode is: "+opcode);
+        System.out.println("shamt is: "+shamt);
+        System.out.println("imm is: "+imm);
+        System.out.println("address is: "+address);
         int type = checkType(opcode);
-        if (type == 1){
-            if (opcode == 8 || opcode == 9){
-                ALU(valueRS,shamt,opcode, instruction);
+        if (type == 1) {
+            if (opcode == 8 || opcode == 9) {
+                ALU(valueRS, shamt, opcode, instruction);
+            } else {
+                ALU(valueRS, valueRT, opcode, instruction);
             }
-            else{
-                ALU(valueRS,valueRT,opcode, instruction);
-            }
-        }
-        else if (type == 2){
-            if (opcode == 4){
-                BNE(valueRS,valueRT,imm);
-            }
-            else if (opcode == 10) {
+        } else if (type == 2) {
+            if (opcode == 4) {
+                BNE(valueRS, valueRT, imm);
+            } else if (opcode == 10) {
                 //Read from memory
                 loadWord(instruction);
-            }
-            else if (opcode == 11){
+            } else if (opcode == 11) {
                 //Write in memory
                 storeWord(instruction);
+            } else {
+                ALU(valueRS, imm, opcode, instruction);
             }
-            else {
-                ALU(valueRS,imm,opcode, instruction);
-            }
-        }
-        else {
+        } else {
             Jump(address);
         }
     }
@@ -331,9 +338,9 @@ public class Processor {
     public void storeWord(int[] instruction) {
 
         int index = instruction[6] + instruction[8];
-        if(index>1023) {
+        if (index > 1023) {
             instruction[14] = index;
-        }else {
+        } else {
             System.out.println("This memory location is reserved for the Instructions");
         }
     }
@@ -341,28 +348,47 @@ public class Processor {
     public void loadWord(int[] instruction) {
         instruction[13] = instruction[6] + instruction[8];
     }
-    public void memoryAccess(int[] instruction){
+
+    public void memoryAccess(int[] instruction) {
         int opcode = instruction[1];
         int valueRD = instruction[10];
         int LW_index = instruction[13];
         int SW_index = instruction[14];
-        if (opcode == 10){
+        System.out.println("Opcode: "+opcode);
+        System.out.println("ValueRD: "+valueRD);
+        System.out.println("LW INDEX: "+LW_index);
+        System.out.println("SW INDEX: "+SW_index);
+        if (opcode == 10) {
             instruction[12] = Memory[LW_index];
-        }
-        else if(opcode == 11){
+        } else if (opcode == 11) {
+            System.out.println("Value of memory at index "+SW_index+"before update is"+Memory[SW_index]);
             Memory[SW_index] = valueRD;
+            System.out.println("Value of memory at index "+SW_index+"after update is"+Memory[SW_index]);
         }
     }
-    public void writeBack(int[] instruction){
+
+    public void writeBack(int[] instruction) {
         int opcode = instruction[1];
         int rd = instruction[2];
         int output = instruction[11];
         int LW_WriteBack = instruction[12];
-        if (opcode != 4 || opcode != 7 || opcode != 11){
-            if (opcode == 10)
+        System.out.println("Opcode "+ opcode);
+        System.out.println("RD "+ rd);
+        System.out.println("Output "+ output);
+        System.out.println("LW_WriteBack "+ LW_WriteBack);
+        if (opcode != 4 || opcode != 7 || opcode != 11) {
+            if (opcode == 10) {
+                System.out.println("The old value of register of R" + rd + " is " + Registers[rd]);
                 Registers[rd] = LW_WriteBack;
-            else Registers[rd] = output;
+                System.out.println("The new value of register of R" + rd + " is " + Registers[rd]);
+            }
+            else{
+                System.out.println("The old value of register of R" + rd + " is " + Registers[rd]);
+                Registers[rd] = output;
+                System.out.println("The new value of register of R" + rd + " is " + Registers[rd]);
+            }
         }
+
     }
 
     public static String readFile(String argument) throws IOException {
@@ -387,40 +413,38 @@ public class Processor {
 
     }
 
-    public void pipeline(){
-        int CLK = 7+((numberOfInstructions-1)*2);
-        int i =1;
+    public void pipeline() {
+        int CLK = 7 + ((numberOfInstructions - 1) * 2);
+        int i = 1;
         pointer = 1;
         fetch();
-        System.out.println("At Clock Cycle "+ 1);
+        System.out.println("At Clock Cycle " + 1);
         System.out.println("Instruction #" + (PC) + " was fetched");
-        while (i<=CLK){
-            if(i>1){
-                System.out.println("At Clock Cycle "+ i);
-                if(i%2==0){
-                    if (fetchedInstructions.containsKey(pointer-2)){
-                        memoryAccess(fetchedInstructions.get(pointer-2));
-                        if(Memory[PC-3] != 0)
-                            System.out.println("Instruction #" + (PC-2) + " had access to memory");
+        while (i <= CLK) {
+            if (i > 1) {
+                if (i % 2 == 0) {
+                    if (fetchedInstructions.containsKey(pointer - 2)) {
+                        memoryAccess(fetchedInstructions.get(pointer - 2));
+                        System.out.println("At Clock Cycle " + i+" instruction #"+(pointer-2)+" was in had access to memory");
                     }
                     if (fetchedInstructions.containsKey(pointer)) {
                         decode(fetchedInstructions.get(pointer)[0], pointer);
-                        if(Memory[PC-1] != 0)
+                        if (Memory[PC - 1] != 0)
                             System.out.println("Instruction #" + (PC) + " was decoded");
                         pointer++;
                     }
 
-                }else{
-                    if (fetchedInstructions.containsKey(pointer-3)){
-                        writeBack(fetchedInstructions.get(pointer-3));
-                        if(Memory[PC-3] != 0)
+                } else {
+                    if (fetchedInstructions.containsKey(pointer - 3)) {
+                        writeBack(fetchedInstructions.get(pointer - 3));
+                        if (Memory[PC - 3] != 0)
                             System.out.println("Instruction #" + (PC - 2) + " at write back stage");
                     }
-                    if(fetchedInstructions.containsKey(pointer-2)){
-                        execute(fetchedInstructions.get(pointer-2));
-                        if (Memory[PC-2] != 0)
-                            System.out.println("Instruction #" + (PC-1) + " was executed");
-                        if(jumpFlag){
+                    if (fetchedInstructions.containsKey(pointer - 2)) {
+                        execute(fetchedInstructions.get(pointer - 2));
+                        if (Memory[PC - 2] != 0)
+                            System.out.println("Instruction #" + (PC - 1) + " was executed");
+                        if (jumpFlag) {
                             fetchedInstructions.clear();
                             pointer = 1;
                             instructionNumber = 1;
@@ -429,7 +453,7 @@ public class Processor {
 
                     }
                     fetch();
-                    if (Memory[PC-1] != 0)
+                    if (Memory[PC - 1] != 0)
                         System.out.println("Instruction #" + (PC) + " was fetched");
                 }
             }
@@ -443,22 +467,22 @@ public class Processor {
         String[] lines = dataOfTheFile.trim().split("\\n+");
         numberOfInstructions = lines.length;
         int c = 0;
-        for (String line:lines) {
+        for (String line : lines) {
             Memory[c] = readInstruction(line);
             c++;
 //            System.out.println(line);
         }
         pipeline();
+        System.out.println(Arrays.toString(Registers));
+        System.out.println(Arrays.toString(Memory));
     }
 
     public static void main(String[] args) throws IOException {
         Processor p = new Processor();
         p.runProgram("src/Test11");
-        System.out.println(Arrays.toString(Registers));
-        System.out.println("STORE: "+ Memory[2047]);
-        System.out.println("STORE: "+ Memory[2047]);
 
-
+        System.out.println("STORE: " + Memory[1024]);
+        System.out.println("STORE: " + Memory[2047]);
 
 
     }
